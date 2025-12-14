@@ -1,4 +1,6 @@
-// 本檔案由 Python 腳本自動生成，包含韓文基礎字母與 KS X 1001 常用字\n\nconst koreanGlyphMap = {
+// 本檔案由 Python 腳本自動生成，包含韓文基礎字母與 KS X 1001 常用字
+
+const koreanGlyphMap = {
   "uni3131": {"c":"ㄱ","w":"F"},
   "uni3132": {"c":"ㄲ","w":"F"},
   "uni3133": {"c":"ㄳ","w":"F"},
@@ -2438,3 +2440,4 @@ if (typeof glyphMap !== 'undefined') {
 if (typeof glyphList !== 'undefined') {
     Object.assign(glyphList, koreanGlyphList);
 }
+
