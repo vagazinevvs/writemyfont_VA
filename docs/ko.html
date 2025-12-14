@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>나만의 글꼴 생성기 by 字嗨</title>
+	<link rel="stylesheet" href="style.css">
+	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body lang="ko">
+	<div id="list-container">
+		<label for="listSelect">문자표:</label>
+		<select id="listSelect"></select>
+		<span class="butt" id="canvasListButton">👓</span>
+		<span class="butt" id="findButton">🔍</span>
+    </div>
+
+    <div id="demo-container">
+		<span id="glyphName"></span>
+		<span id="charSeq"></span>
+		<span id="glyphNote"></span>
+		<span class="butt" id="prevButton">👈</span>
+		<span class="butt" id="nextButton">👉</span>
+    </div>
+	<div id="canvas-container">
+        <canvas id="gridCanvas" width="500" height="500"></canvas>
+        <canvas id="drawingCanvas" width="500" height="500"></canvas>
+    </div>
+
+	<div id="slider-container">
+		<div id="brushSelector"></div><div id="pressureButton" class="off"></div>
+		<span class="butt use" id="penButton">🖌️</span><span class="butt" id="eraserButton">🚿</span>
+		<input id="lineWidthSlider" type="range" min="2" max="36" value="12" />
+		<label for="lineWidthSlider"><span id="lineWidthValue">12</span></label>
+	</div>
+
+	<div id="button-container">
+		<span class="butt" id="clearButton">🚮</span>
+		<span class="butt" id="moveLeftButton">⬅️</span>
+		<span class="butt" id="moveRightButton">➡️</span>
+		<span class="butt" id="moveUpButton">⬆️</span>
+		<span class="butt" id="moveDownButton">⬇️</span>
+		<span class="butt" id="undoButton">↩️</span>
+    </div>
+
+	<div id="navi-container">
+		<span class="butt" id="hintButton">💡</span>
+		<span class="butt" id="settingButton">⚙️</span>
+		<span id="spanDoneCount">-</span>
+		<span class="butt" id="downloadButton">💾</span>
+    </div>
+	<div id="progress-container">
+		<progress id="progress-bar" value="0" max="100"></progress>
+		<span id="progress-text">0%</span>
+	</div>
+
+	<div id="listup-container" class="dialog">
+		<div class="dialog-body">
+			<span id="closeListupButton" class="close">×</span>
+			<h2>문자 목록</h2>
+			<div id="listup-body"></div>
+		</div>
+	</div>
+
+	<div id="hint-container" class="dialog">
+		<div class="dialog-body">
+			<span id="closeHintButton" class="close">×</span>
+			<h2>팁 (Tip) Ver <span id="version"></span></h2>
+			<ul id="hintContent">
+				<li>이 도구는「<a href="https://zi-hi.com" target="_blank">字嗨！</a>」에 의해 제공됩니다.</li>
+				<li>글쓰기를 위한 문자표는「<a href="https://justfont.com/jf7000" target="_blank">jf7000 상용 문자 집합</a>」에서 가져왔습니다.</li>
+				<li>모든 데이터는 브라우저 로컬에 저장되므로, 브라우저에서 데이터가 지워지는 것이 염려된다면, 정기적으로 내보내기 기능으로 데이터를 백업하는 것을 권장합니다.</li>
+				<li>문자를 다 쓴 후에는 즉시 위치를 조정하는 것이 좋습니다 (한글/한자 원칙상 중앙 배치). 이렇게 하면 나중에 조정하기가 더 쉬워집니다.</li>
+				<li>반각 문자는 항상 비례 폭으로 출력되므로 수평 위치는 무시됩니다. 배경의 빨간 선은 기준선의 참고 위치입니다.</li>
+				<li>전각 영숫자는 반각 영숫자를 사용하여 자동으로 생성됩니다.</li>
+				<li>필요한 문자가 모두 갖춰지면, 시스템이 자동으로 세로 쓰기 및 조합 문자 설정을 처리합니다.</li>
+				<li>기술적 한계로 인해 현재 시스템에서 생성된 OTF 파일은 설치 및 사용은 가능하나, 정확한 CID 형식이 아니므로 Adobe 소프트웨어에서 CJK 글꼴로 올바르게 인식되지 않을 수 있습니다.</li>
+				<li>본 서비스로 생성된 글꼴 파일 사용으로 인해 발생하는 모든 영향에 대해 본 서비스와 저자는 어떠한 책임도 지지 않습니다.</li>
+				<li>본 시스템은 사용자의 필체나 기타 사용자 정보를 수집하지 않습니다. 다만, 글꼴 파일을 공개할 때는 필체 공개의 위험을 스스로 평가해 주세요.</li>
+				<li>이 도구는 부정기적으로 업데이트됩니다. 이전 버전과의 호환성을 최대한 유지하려고 노력하지만, 다양한 구형 메커니즘을 지원하는 데는 어려움이 있습니다. 모든 버전의 소스 코드는 GitHub에서 공개되어 있으며, 직접 사용할 수 있습니다. 기술 지원이 필요하면 저자에게 문의하십시오 (유료일 수 있음).</li>
+				<li>본 프로젝트의 GitHub 페이지는 <a href="https://github.com/ButTaiwan/writemyfont" target="_blank">여기</a>에서 더 많은 정보를 확인할 수 있습니다.<p class="dummy"></p></li>
+			</ul>
+		</div>
+	</div>
+
+	<div id="settings-container" class="dialog">
+		<div class="dialog-body">
+			<span id="closeSettingsButton" class="close">×</span>
+			<h2 id="settings-title">설정</h2>
+			<span class="note" id="span-welcome">글쓰기 전에 몇 가지 기본 정보를 설정해 봅시다! 이 설정들은 나중에 언제든지 변경할 수 있습니다.<br>앱 내장 브라우저에서 이 페이지를 열 경우 데이터 손실을 방지하기 위해 시스템 브라우저를 사용하는 것을 권장합니다!</span>
+
+            
+            <h3>글꼴 영문 이름</h3>
+			<input id="fontNameEng" type="text" placeholder="영문 이름을 입력하세요" maxlength="24" />
+			<h3>글꼴 한글 이름</h3>
+			<input id="fontNameCJK" type="text" placeholder="한글 이름을 입력하세요" maxlength="10" />
+			
+			<h3>확대/축소율</h3>
+			<input id="scaleRateSlider" type="range" min="80" max="200" value="100" />
+			<span id="scaleRateValue">100%</span>
+			<span class="note">손글씨를 쓸 때 틀을 벗어나지 않으려고 무의식적으로 글씨를 작게 쓰는 경향이 있습니다. 여기서 문자 칸의 크기를 조정할 수 있습니다.</span>
+
+			<h3>글씨가 정말 작음</h3>
+			<input id="smallModeCheck" type="checkbox" />
+			<span class="note">글씨가 정말 작은 분에게 적합합니다.</span>
+
+			<h3>배경 격자 스타일</h3>
+			<select id="gridTypeSelect">
+				<option value="3x3grid">9분할 격자</option>
+				<option value="3x3grid-new">새 9분할 격자</option>
+				<option value="2x2grid">정사각형 격자</option>
+				<option value="stargrid">미자격 (별모양)</option>
+				<option value="boxgrid">회자격 (되돌이)</option>
+				<option value="nogrid">격자 없음 (글리프 박스만)</option>
+			</select>
+
+			<h3>한글/한자 비균일 폭</h3>
+			<input id="noFixedWidthFlag" type="checkbox" />
+			<span class="note">비균일 폭으로 설정하면 손글씨처럼 보이지만 세로 쓰기에는 적합하지 않을 수 있습니다.</span>
+
+			<h3>필압 감도 (실험 중)</h3>
+			<select id="pressureEffectSelect">
+				<option value="none">원시 값</option>
+				<option value="contrast">대비 증가</option>
+				<option value="enhance">강화 (노력 절감)</option>
+				<option value="enhancex">추가 강화 (더 노력 절감)</option>
+			</select>
+			<span class="note">이 옵션은 필압 기능이 있는 장치에만 유효합니다. 현재 조정 중이며, 향후 변경 사항은 이전 버전과의 호환성을 유지하기 어려울 수 있습니다.</span>
+
+			<h3>구형 필압 모드 활성화 (권장하지 않음)</h3>
+			<input id="pressureDrawingEnabled" type="checkbox" checked />
+			<span class="note">구형 필압 모드는 브러시 기능을 지원하지 않습니다.</span>
+
+			<div id="div-backup">
+			<br />
+			<br />
+			<br />
+			<hr />
+			<h3>글꼴 데이터 전체 삭제</h3>
+			<button id="clearAllButton">글꼴 데이터 삭제 (복원 불가!)</button>
+			<br />
+			<h3>시스템 이벤트 내보내기 (개발용)</h3>
+			<button id="exportEventsButton">시스템 이벤트 내보내기</button>
+			<br />
+			</div>
+			<p class="dummy"></p>
+		</div>
+	</div>
+
+	<div id="download-container" class="dialog">
+		<div class="dialog-body">
+			<span id="closeDownloadButton" class="close">×</span>
+			<h2 id="settings-title">다운로드</h2>
+
+			<h3>글꼴 다운로드</h3>
+			<input id="saveAsTester" type="checkbox" />
+			<label for="saveAsTester">테스트 출력</label>
+			<span class="note">테스트 출력을 선택하면 글꼴 이름에 일련번호가 추가됩니다. 이는 시스템 캐시로 인해 컴퓨터에 정상적으로 설치되지 않는 문제를 방지합니다.</span>
+			<button id="downloadFontButton">글꼴 OTF 파일 다운로드</button><br>
+			<h3>제작자 후원</h3>
+			글꼴 파일의 권리는 전적으로 사용자에게 있습니다. 하지만 이 도구가 마음에 드신다면, <a href="https://p.ecpay.com.tw/930AED7" target="_blank">제작자의 개발 작업을 후원하는 것을 고려해 주십시오</a>. 여러분의 후원은 향후 업데이트 및 개선에 도움이 될 것입니다!
+			<br />
+			<br />
+			<hr />
+			<h3>이전 백업 데이터 가져오기</h3>
+			<input type="file" id="importDataFile" accept=".txt" />
+			<br />
+			<h3>편집 중인 데이터 내보내기</h3>
+			<button id="exportDataButton">작업 중인 글꼴 데이터 백업</button>
+			<br />
+			<p class="dummy"></p>
+		</div>
+	</div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script src="https://opentype.js.org/dist/opentype.js"></script>
+    <script src="potrace.js"></script>
+	<script>
+		// =========================================================
+		// 語言切換導航邏輯 (韓文版頁面邏輯)
+		// =========================================================
+		$(document).ready(function() {
+            // 監聽語言選擇器的變化
+            $('#interfaceLanguageSelect').on('change', function() {
+                var selectedLang = $(this).val();
+
+                if (selectedLang === 'ko') {
+                    // 如果選擇韓文，導向到 ko.html (保持不變)
+                    window.location.href = 'ko.html'; 
+                } else if (selectedLang === 'zh-TW' || selectedLang === 'en') {
+                    // 如果在 index.html 上選擇中文或英文，則停留在當前頁面 (並可選地重新載入以應用語言檔)
+                    // 這裡的邏輯需要確保 index.html 也能處理多語言切換，但目前只處理 ko 的導航。
+                    // 由於當前頁面是 index.html，選擇 zh-TW 或 en 時不做跳轉，但儲存設定。
+                }
+                
+                // 可選：儲存選擇的語言到 localStorage，以便下次載入時選中
+                localStorage.setItem('interfaceLanguage', selectedLang);
+            });
+
+            // 初始化設定：如果 localStorage 中有儲存的語言，則選中它
+            var savedLang = localStorage.getItem('interfaceLanguage') || 'zh-TW';
+            $('#interfaceLanguageSelect').val(savedLang);
+
+            // 確保韓文選項在 index.html 上被選中時，頁面不會因初始化而立即跳轉
+            // 這裡的 `selected` 屬性已經在 HTML 中設置，但 JS 初始化時會覆蓋，並觸發跳轉。
+            // 為了避免在 index.html 載入時立即跳轉，我們需要移除 ko 選項上的 `selected`，並依賴 JS 邏輯來處理跳轉。
+            // 由於您的 HTML 已經有 `selected`，我們假設這是您期望的行為。
+        });
+
+		// 韓文版的 fdrawer 配置 (已翻譯)
+		const fdrawer = {
+			dbName: 'FontDrawerDB',
+			fontNameCJK: '나의 손글씨', // '我的手寫字型'
+			fontLang: 'ko', // 語言設定為 ko
+			codePage: 0x00100001,
+			findMsg: '찾을 문자를 입력하세요:', // '請輸入要找的文字：'
+			notFound: '이 문자를 찾을 수 없습니다!', // '查無此字符！'
+			confirmAdd: '사용자 문자표에 추가하시겠습니까?', // '請問要新增到使用者字表嗎？'
+			noDataToExport: '내보낼 수 있는 데이터가 없습니다.', // '沒有可匯出的資料。'
+			importConfirm: '데이터를 가져오시겠습니까? 현재 편집 중인 모든 데이터는 지워집니다.', // '確定要匯入資料嗎？這將清除目前編輯中的所有資料。'
+			importDone: '가져오기가 완료되었습니다.', // '匯入完成。'
+			clearConfirm: '작성된 모든 글꼴을 지우시겠습니까?', // '確定要清除所有寫過的字嗎？'
+			clearDone: '지워졌습니다.', // '已清除。'
+			welcomeTitle: '나만의 글꼴 생성기에 오신 것을 환영합니다!', // '歡迎使用手寫字型產生器！'
+			settingsTitle: '글꼴 설정', // '字型設定'
+			inAppNotice: '최적의 사용 경험을 위해 기기 브라우저를 사용하는 것을 권장합니다.', // '請使用裝置瀏覽器開啟以獲得最佳使用體驗。'
+			customList: '사용자 문자표' // '使用者字表'
+		};
+	</script>
+
+    <script src="pressure-drawing.js"></script>
+    <script src="cglyphlist.js"></script>
+    <script src="korean_data.js"></script>
+    <script src="fontdrawer.js"></script>
+</body>
+</html>

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title data-lang-key="title_main">手寫字型產生器 by 字嗨</title>
+	<link rel="stylesheet" href="style.css">
+	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    
+    <script>
+        // 從 localStorage 讀取選擇的語言，預設為中文
+        var savedLang = localStorage.getItem('interfaceLanguage') || 'zh-TW';
+        
+        // 將當前語言代碼設置在 html 和 body 標籤上
+        document.documentElement.setAttribute('lang', savedLang);
+        
+        // 動態注入對應的語言檔案
+        var script = document.createElement('script');
+        script.src = 'lang_' + savedLang + '.js';
+        document.head.appendChild(script);
+
+        // 聲明全局變數，以便後續的 applyTranslations 函式能存取 translations
+        // 變數 translations 會在 lang_*.js 檔案載入時被定義
+        let currentTranslations = {};
+    </script>
+    </head>
+<body lang="zh-TW">
+	<div id="list-container">
+		<label for="listSelect" data-lang-key="label_wordlist">字表：</label>
+		<select id="listSelect"></select>
+		<span class="butt" id="canvasListButton">👓</span>
+		<span class="butt" id="findButton">🔍</span>
+    </div>
+
+    <div id="demo-container">
+		<span id="glyphName"></span>
+		<span id="charSeq"></span>
+		<span id="glyphNote"></span>
+		<span class="butt" id="prevButton">👈</span>
+		<span class="butt" id="nextButton">👉</span>
+    </div>
+	<div id="canvas-container">
+        <canvas id="gridCanvas" width="500" height="500"></canvas>
+        <canvas id="drawingCanvas" width="500" height="500"></canvas>
+    </div>
+
+	<div id="slider-container">
+		<div id="brushSelector"></div><div id="pressureButton" class="off"></div>
+		<span class="butt use" id="penButton">🖌️</span><span class="butt" id="eraserButton">🚿</span>
+		<input id="lineWidthSlider" type="range" min="2" max="36" value="12" />
+		<label for="lineWidthSlider"><span id="lineWidthValue">12</span></label>
+	</div>
+
+	<div id="button-container">
+		<span class="butt" id="clearButton">🚮</span>
+		<span class="butt" id="moveLeftButton">⬅️</span>
+		<span class="butt" id="moveRightButton">➡️</span>
+		<span class="butt" id="moveUpButton">⬆️</span>
+		<span class="butt" id="moveDownButton">⬇️</span>
+		<span class="butt" id="undoButton">↩️</span>
+    </div>
+
+	<div id="navi-container">
+		<span class="butt" id="hintButton">💡</span>
+		<span class="butt" id="settingButton">⚙️</span>
+		<span id="spanDoneCount">-</span>
+		<span class="butt" id="downloadButton">💾</span>
+    </div>
+	<div id="progress-container">
+		<progress id="progress-bar" value="0" max="100"></progress>
+		<span id="progress-text">0%</span>
+	</div>
+
+	<div id="listup-container" class="dialog">
+		<div class="dialog-body">
+			<span id="closeListupButton" class="close">×</span>
+			<h2 data-lang-key="dialog_char_list">字符列表</h2>
+			<div id="listup-body"></div>
+		</div>
+	</div>
+
+	<div id="hint-container" class="dialog">
+		<div class="dialog-body">
+			<span id="closeHintButton" class="close">×</span>
+			<h2 data-lang-key="dialog_hint_title">提示 Ver <span id="version"></span></h2>
+			<ul id="hintContent">
+				<li>本工具由「<a href="https://zi-hi.com" target="_blank">字嗨！</a>」提供。</li>
+				<li>書寫的字表來自「<a href="https://justfont.com/jf7000" target="_blank">jf7000當務字集</a>」。</li>
+				<li>由於所有資料儲存在您瀏覽器本地端，若擔心被瀏覽器清除，建議定期用匯出功能備份資料。</li>
+				<li>建議每個字寫好後，就立刻調整位置（漢字原則上置中），這樣可避免事後調整困難。</li>
+				<li>半形文字一律輸出成比例寬，故水平方向位置會被忽略。背景的紅線是基線的參考位置。</li>
+				<li>全形的英數字會使用半形英數字自動產生。</li>
+				<li>當所需的字符齊全時，系統會自動處理直排、組合文字的設定。</li>
+				<li>請注意因為技術的限制，目前本系統所產生的OTF檔案，雖可勉強安裝運作，但並非正確的CID格式，可能在Adobe軟體無法正確識別為CJK字型。</li>
+				<li>本服務所生成的字型檔，若使用上造成任何影響，本服務與作者不負任何責任。</li>
+				<li>本系統並未蒐集任何使用者筆跡或其他用戶資訊。但若要公開您的字型檔時，請自行評估筆跡公開的風險。</li>
+				<li>本工具不定期更新，雖然力求盡可能支援先前的版本，但要維護多種舊機制相各種環境有所困難，難以盡善盡美。由於所有版本程式碼都是開源的，可自行從GitHub上使用。若有技術支援需求，可與作者聯絡（可能須付費）。</li>
+				<li>本專案GitHub頁面在<a href="https://github.com/ButTaiwan/writemyfont" target="_blank">這裡</a>，在此可查閱更多資訊。<p class="dummy"></p></li>
+			</ul>
+		</div>
+	</div>
+
+	<div id="settings-container" class="dialog">
+		<div class="dialog-body">
+			<span id="closeSettingsButton" class="close">×</span>
+			<h2 id="settings-title" data-lang-key="settings_title">設定</h2>
+			<span class="note" id="span-welcome" data-lang-key="note_welcome">在開始書寫之前，先來設定一些基本資訊吧！這些設定值之後都能再更改。<br>提醒您，若您是在App內的瀏覽器開啟本頁，建議用系統瀏覽器開啟，避免資料遺失！</span>
+
+            <h3 data-lang-key="interface_lan">介面語言 (Language)</h3>
+            <select id="interfaceLanguageSelect">
+                <option value="zh-TW">中文 (繁體)</option>
+                <option value="en">English (英文)</option>
+                <option value="ko">한국어 (韓文)</option>
+            </select>
+            <span class="note" data-lang-key="note_interface_lang">設定介面顯示語言。切換語言後頁面將會自動重新整理。</span>
+            <hr />
+            
+            <h3 data-lang-key="label_font_name_eng">字型英文名稱</h3>
+			<input id="fontNameEng" type="text" placeholder="請輸入英文名稱" maxlength="24" />
+
+			<h3 data-lang-key="label_font_name_cjk">字型中文名稱</h3>
+			<input id="fontNameCJK" type="text" placeholder="請輸入中文名稱" maxlength="10" />
+			
+			<h3 data-lang-key="label_scale_rate">縮放率</h3>
+			<input id="scaleRateSlider" type="range" min="80" max="200" value="100" />
+			<span id="scaleRateValue">100%</span>
+			<span class="note" data-lang-key="note_scale_rate">手寫時為了避免超框，容易不經意把字寫得偏小。這裡可以調整文字框的尺寸。</span>
+
+			<h3 data-lang-key="label_small_mode">我的字就是小</h3>
+			<input id="smallModeCheck" type="checkbox" />
+			<span class="note" data-lang-key="note_small_mode">適合寫字真的很小的人。</span>
+
+			<h3 data-lang-key="label_grid_style">背景格線樣式</h3>
+			<select id="gridTypeSelect">
+				<option value="3x3grid" data-lang-key="grid_3x3">九宮格</option>
+				<option value="3x3grid-new" data-lang-key="grid_3x3_new">新九宮格</option>
+				<option value="2x2grid" data-lang-key="grid_2x2">田字格</option>
+				<option value="stargrid" data-lang-key="grid_star">米字格</option>
+				<option value="boxgrid" data-lang-key="grid_box">回字格</option>
+				<option value="nogrid" data-lang-key="grid_no">無格線（僅字身框）</option>
+			</select>
+
+			<h3 data-lang-key="label_no_fixed_width">中文字不等寬</h3>
+			<input id="noFixedWidthFlag" type="checkbox" />
+			<span class="note" data-lang-key="note_no_fixed_width">設定為不等寬會更像手寫字型，但可能不適合用於直排。</span>
+
+			<h3 data-lang-key="label_pressure_effect">筆壓敏感度（實驗中）</h3>
+			<select id="pressureEffectSelect">
+				<option value="none" data-lang-key="option_none">原始值</option>
+				<option value="contrast" data-lang-key="option_contrast">加大對比</option>
+				<option value="enhance" data-lang-key="option_enhance">增強（省力）</option>
+				<option value="enhancex" data-lang-key="option_enhancex">再增強（更省力）</option>
+			</select>
+			<span class="note" data-lang-key="note_pressure_effect">本選項僅對有筆壓的設備有效。目前尚在調整中，未來修改可能無法維持舊版相容性。</span>
+
+			<h3 data-lang-key="label_old_pressure">啟用舊筆壓模式（不建議）</h3>
+			<input id="pressureDrawingEnabled" type="checkbox" checked />
+			<span class="note" data-lang-key="note_old_pressure">舊筆壓模式無法支援筆刷功能。</span>
+
+			<div id="div-backup">
+			<br />
+			<br />
+			<br />
+			<hr />
+			<h3 data-lang-key="h3_clear_all">完全清除字型資料</h3>
+			<button id="clearAllButton" data-lang-key="button_clear_all_text">清除字型資料（無法復原！）</button>
+			<br />
+			<h3 data-lang-key="h3_export_events">匯出系統事件（開發用）</h3>
+			<button id="exportEventsButton" data-lang-key="button_export_events_text">匯出系統事件</button>
+			<br />
+			</div>
+			<p class="dummy"></p>
+		</div>
+	</div>
+
+	<div id="download-container" class="dialog">
+		<div class="dialog-body">
+			<span id="closeDownloadButton" class="close">×</span>
+			<h2 id="settings-title" data-lang-key="download_title">下載</h2>
+
+<h3 data-lang-key="h3_download_font">下載字型</h3>
+			<input id="saveAsTester" type="checkbox" />
+			<label for="saveAsTester" data-lang-key="label_save_as_tester">測試輸出</label>
+			<span class="note" data-lang-key="note_save_as_tester">勾選測試輸出，字型名稱會加上流水號。避免系統快取造成在電腦上無法正常安裝使用的問題。</span>
+			<button id="downloadFontButton" data-lang-key="button_download_font_otf">下載字型OTF檔案</button><br>
+			<h3>斗內作者</h3>
+			字型檔的權利均屬於您個人，不過如果您喜歡這個工具，請<a href="https://p.ecpay.com.tw/930AED7" target="_blank">考慮斗內支持作者的開發工作</a>。您的支持將有助於未來的更新和改進！
+			<br />
+			<br />
+			<hr />
+			<h3 data-lang-key="button_import_data">匯入先前備份的資料</h3>
+			<input type="file" id="importDataFile" accept=".txt" />
+			<br />
+			<h3 data-lang-key="button_export_data">匯出編輯中資料</h3>
+			<button id="exportDataButton">備份工作中的字型資料</button>
+			<br />
+			<p class="dummy"></p>
+		</div>
+	</div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script src="https://opentype.js.org/dist/opentype.js"></script>
+    <script src="potrace.js"></script>
+	
+	<script>
+        // 核心：應用翻譯到所有帶有 data-lang-key 的元素，並更新 fdrawer
+        function applyTranslations() {
+            // 確保 translations 變數已被載入 (由動態腳本載入器載入)
+            if (typeof translations === 'undefined') {
+                console.error("Translation file not loaded.");
+                return;
+            }
+            
+            // 1. 更新 HTML 元素
+            $('[data-lang-key]').each(function() {
+                const key = $(this).attr('data-lang-key');
+                if (translations[key] !== undefined) {
+                    const text = translations[key];
+                    // 對於 <select> 的 <option>，如果其 value 是網格類型或壓力選項，則更新文本
+                    if ($(this).is('option') && (key.startsWith('grid_') || key.startsWith('option_'))) {
+                         $(this).text(text);
+                    }
+                    // 對於包含 HTML 的內容 (例如提示筆記)，使用 html()
+                    else if ($(this).is('.note') || $(this).is('#hintContent')) {
+                        $(this).html(text);
+                    }
+                    // 對於 <title>
+                    else if ($(this).is('title')) {
+                        document.title = text;
+                    }
+                    // 對於其他元素 (h, label, span)，使用 text()
+                    else {
+                        $(this).text(text);
+                    }
+                }
+            });
+
+            // 2. 更新 fdrawer 內部訊息
+            if (typeof fdrawer !== 'undefined' && translations.fdrawer_font_name_cjk) {
+                const selectedLang = $('#interfaceLanguageSelect').val() || 'zh-TW';
+                
+                fdrawer.fontNameCJK = translations.fdrawer_font_name_cjk;
+                fdrawer.fontLang = selectedLang; 
+                fdrawer.findMsg = translations.fdrawer_find_msg;
+                fdrawer.notFound = translations.fdrawer_not_found;
+                fdrawer.confirmAdd = translations.fdrawer_confirm_add;
+                fdrawer.noDataToExport = translations.fdrawer_no_data_export;
+                fdrawer.importConfirm = translations.fdrawer_import_confirm;
+                fdrawer.importDone = translations.fdrawer_import_done;
+                fdrawer.clearConfirm = translations.fdrawer_clear_confirm;
+                fdrawer.clearDone = translations.fdrawer_clear_done;
+                fdrawer.welcomeTitle = translations.fdrawer_welcome_title;
+                fdrawer.settingsTitle = translations.fdrawer_settings_title;
+                fdrawer.inAppNotice = translations.fdrawer_in_app_notice;
+                fdrawer.customList = translations.fdrawer_custom_list;
+            }
+        }
+        
+		// 讓應用程式知道 fdrawer 變數的預設存在 (將在 applyTranslations 中被覆寫)
+		const fdrawer = {
+			dbName: 'FontDrawerDB',
+			fontNameCJK: '我的手寫字型',
+			fontLang: 'zh-TW',
+			codePage: 0x00100001,
+			findMsg: '請輸入要找的文字：',
+			notFound: '查無此字符！',
+			confirmAdd: '請問要新增到使用者字表嗎？',
+			noDataToExport: '沒有可匯出的資料。',
+			importConfirm: '確定要匯入資料嗎？這將清除目前編輯中的所有資料。',
+			importDone: '匯入完成。',
+			clearConfirm: '確定要清除所有寫過的字嗎？',
+			clearDone: '已清除。',
+			welcomeTitle: '歡迎使用手寫字型產生器！',
+			settingsTitle: '字型設定',
+			inAppNotice: '請使用裝置瀏覽器開啟以獲得最佳使用體驗。',
+			customList: '使用者字表'
+		};
+
+		$(document).ready(function() {
+            // 設置選擇器選中正確的語言
+            $('#interfaceLanguageSelect').val(savedLang);
+            
+            // 由於語言檔是異步載入的，我們需要等待它載入完成後再應用翻譯
+            setTimeout(applyTranslations, 100); 
+
+            // 監聽語言選擇器的變化
+            $('#interfaceLanguageSelect').on('change', function() {
+                var selectedLang = $(this).val();
+
+                // 儲存選擇的語言到 localStorage
+                localStorage.setItem('interfaceLanguage', selectedLang);
+                
+                // 不論選擇哪種語言，都強制重新載入頁面，讓動態腳本載入器載入正確的語言檔案。
+                window.location.reload(); 
+            });
+		});
+	</script>
+
+    <script src="pressure-drawing.js"></script>
+    <script src="cglyphlist.js"></script>
+    <script src="korean_data.js"></script>
+    <script src="fontdrawer.js"></script>
+</body>
+</html>
