@@ -31,6 +31,8 @@ const translations = {
     "button_export_events_text": "Export System Events",
     "button_download_font_otf": "Download Font OTF",
     "button_export_data_backup": "Backup WIP Font Data",
+    "button_import_data": "Import data",
+    "button_export_data": "Export data",
     
     // Option Translations (Select Option Texts)
     "grid_3x3": "3x3 Grid",
