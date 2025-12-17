@@ -252,14 +252,16 @@
                 fdrawer.notFound = translations.fdrawer_not_found;
                 fdrawer.confirmAdd = translations.fdrawer_confirm_add;
                 fdrawer.noDataToExport = translations.fdrawer_no_data_export;
-                fdrawer.importConfirm = translations.fdrawer_import_confirm;
+                fdrawer.importConfirm = translations.fdrawer_import_confirm_incremental;
                 fdrawer.importDone = translations.fdrawer_import_done;
                 fdrawer.clearConfirm = translations.fdrawer_clear_confirm;
                 fdrawer.clearDone = translations.fdrawer_clear_done;
                 fdrawer.welcomeTitle = translations.fdrawer_welcome_title;
                 fdrawer.settingsTitle = translations.fdrawer_settings_title;
                 fdrawer.inAppNotice = translations.fdrawer_in_app_notice;
-                fdrawer.customList = translations.fdrawer_custom_list;
+                fdrawer.customList = translations.fdrawer_custom_list
+				
+				
             }
         }
         
@@ -273,7 +275,7 @@
 			notFound: '查無此字符！',
 			confirmAdd: '請問要新增到使用者字表嗎？',
 			noDataToExport: '沒有可匯出的資料。',
-			importConfirm: '確定要匯入資料嗎？這將清除目前編輯中的所有資料。',
+			importConfirm: '確定要從檔案匯入資料嗎？將只會新增資料庫中不存在的字符，不會覆蓋現有內容。',
 			importDone: '匯入完成。',
 			clearConfirm: '確定要清除所有寫過的字嗎？',
 			clearDone: '已清除。',
@@ -281,6 +283,7 @@
 			settingsTitle: '字型設定',
 			inAppNotice: '請使用裝置瀏覽器開啟以獲得最佳使用體驗。',
 			customList: '使用者字表'
+			
 		};
 
 		$(document).ready(function() {

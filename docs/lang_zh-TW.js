@@ -75,5 +75,6 @@ const translations = {
     "fdrawer_welcome_title": "歡迎使用手寫字型產生器！",
     "fdrawer_settings_title": "字型設定",
     "fdrawer_in_app_notice": "請使用裝置瀏覽器開啟以獲得最佳使用體驗。",
-    "fdrawer_custom_list": "使用者字表"
+    "fdrawer_custom_list": "使用者字表",
+	"fdrawer_import_confirm_incremental": "確定要匯入資料嗎？這將會新增資料庫中沒有的字符，原本已寫過的字將不會被覆蓋。"
 };

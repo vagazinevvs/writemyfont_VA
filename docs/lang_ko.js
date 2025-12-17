@@ -73,5 +73,6 @@ const translations = {
     "fdrawer_welcome_title": "나만의 글꼴 생성기에 오신 것을 환영합니다!",
     "fdrawer_settings_title": "글꼴 설정",
     "fdrawer_in_app_notice": "최적의 사용 경험을 위해 기기 브라우저를 사용하는 것을 권장합니다.",
-    "fdrawer_custom_list": "사용자 문자표"
+    "fdrawer_custom_list": "사용자 문자표",
+	"fdrawer_import_confirm_incremental": "데이터를 가져오시겠습니까? 데이터베이스에 없는 문자만 추가되며, 이미 작성된 문자는 덮어쓰지 않습니다."
 };

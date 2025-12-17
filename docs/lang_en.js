@@ -75,5 +75,6 @@ const translations = {
     "fdrawer_welcome_title": "Welcome to the Handwriting Font Generator!",
     "fdrawer_settings_title": "Font Settings",
     "fdrawer_in_app_notice": "Please use your device's system browser for the best experience.",
-    "fdrawer_custom_list": "User Wordlist"
+    "fdrawer_custom_list": "User Wordlist",
+	"fdrawer_import_confirm_incremental": "Are you sure you want to import? This will only add new characters. Existing characters in your database will NOT be overwritten."
 };
