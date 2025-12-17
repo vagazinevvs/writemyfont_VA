@@ -25,12 +25,18 @@ const translations = {
     "h3_export_events": "Export System Events (For Developers)",
     "h3_import_data": "Import Previous Backup Data",
     "h3_export_data": "Export Work-in-Progress Data",
-
+    
+	// Export filter
+	"label_export_filter": "Export Filter:",
+    "option_export_all": "All",
+    "option_export_zh_basic": "Chinese",
+    "option_export_ko_basic": "Korean",
+	
     // Button Texts
     "button_clear_all_text": "Clear Font Data (!Irreversible!)",
     "button_export_events_text": "Export System Events",
     "button_download_font_otf": "Download Font OTF",
-    "button_export_data_backup": "Backup WIP Font Data",
+    "button_export_data_backup": "Backup temp Font Data",
     "button_import_data": "Import data",
     "button_export_data": "Export data",
     

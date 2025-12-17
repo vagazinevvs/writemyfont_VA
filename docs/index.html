@@ -192,6 +192,14 @@
 			<input type="file" id="importDataFile" accept=".txt" />
 			<br />
 			<h3 data-lang-key="h3_export_data">匯出編輯中資料</h3>
+			<div style="margin-bottom: 10px;">
+				<label for="exportFilterSelect" data-lang-key="label_export_filter">匯出範圍：</label>
+				<select id="exportFilterSelect" style="width: 50%; padding: 5px; margin-top: 5px;">
+					<option value="all" data-lang-key="option_export_all">所有字 (All)</option>
+					<option value="zh_basic" data-lang-key="option_export_zh_basic">中文字</option>
+					<option value="ko_basic" data-lang-key="option_export_ko_basic">韓文字</option>
+				</select>
+			</div>
 			<button id="exportDataButton" data-lang-key="button_export_data_backup">備份工作中的字型資料</button><br />
 			<p class="dummy"></p>
 		</div>

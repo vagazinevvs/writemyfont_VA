@@ -26,6 +26,12 @@ const translations = {
     "h3_import_data": "이전 백업 데이터 가져오기",
     "h3_export_data": "편집 중인 데이터 내보내기",
 
+    // Export filter
+    "label_export_filter": "내보내기 범위:",
+    "option_export_all": "모든 문자 ALL",
+    "option_export_zh_basic": "한자",
+    "option_export_ko_basic": "한글 ",
+
     // Button Texts
     "button_clear_all_text": "글꼴 데이터 삭제 (복원 불가!)",
     "button_export_events_text": "시스템 이벤트 내보내기",

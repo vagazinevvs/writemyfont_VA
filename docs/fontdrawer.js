@@ -1210,22 +1210,88 @@ $(document).ready(async function () {
 	});
 
 	// 匯出資料
+	// fontdrawer.js
+
 	$('#exportDataButton').on('click', async function () {
+		const filterType = $('#exportFilterSelect').val(); // 取得篩選模式
+		let exportContent = "";
+		
+		// 取得兩個資料庫的所有鍵值 (用於精確比對)
+		// cglyphlist.js 定義的是 glyphMap
+		// korean_data_2350.js 定義的是 koreanGlyphMap
+		const zhKeys = Object.keys(glyphMap);
+		const koKeys = Object.keys(koreanGlyphMap);
+		
+		
 		const transaction = db.transaction([storeName], 'readonly');
 		const store = transaction.objectStore(storeName);
-		const request = store.getAll();
+		const request = store.openCursor();
 
-		request.onsuccess = async function (event) {
-			const data = event.target.result.map(item => `${item.key}\t${item.value}`).join('\n');
-			if (data.length > 0) {
-				const blob = new Blob([data], { type: 'text/plain' });
-				const link = document.createElement('a');
-				link.download = settings.fontNameEng + '-' + (new Date()).toISOString() + '.txt';
-				link.href = window.URL.createObjectURL(blob);
-				link.click();
+		request.onsuccess = function (event) {
+			const cursor = event.target.result;
+			if (cursor) {
+				const key = cursor.key;
+				let value = cursor.value;
+				let shouldExport = false;
+				// --- 1. 處理 [object Object] 問題 ---
+				// 如果 value 是物件而不是字串，將其轉換回字串
+				if (typeof value === 'object' && value !== null) {
+					// 如果物件中有 d 屬性 (SVG Path)，則取 d
+					if (value.d) {
+						value = value.d;
+					} else {
+						// 否則轉為 JSON 字串，避免出現 [object Object]
+						value = JSON.stringify(value);
+					}
+				}
+				// --- 2. 核心判定邏輯 (維持之前的篩選機制) ---
+				let code = -1;
+				// 去除 key 的前綴 (例如 's_uniAC00' 或 'g_uniAC00') 來取得 Unicode
+				const cleanKey = key.replace(/^[sg]_/, ''); 
+				
+				if (cleanKey.startsWith('uni')) {
+					code = parseInt(cleanKey.replace('uni', ''), 16);
+				}
+				const isKorean = (code >= 0xAC00 && code <= 0xD7AF) || (code >= 0x3130 && code <= 0x318F);
+				const isBasicTool = !key.startsWith('uni') || (code > 0 && code < 0x2E80);
+
+				if (filterType === 'all') {
+					shouldExport = true;
+				} 
+				else if (filterType === 'zh_basic') {
+					if (!isKorean) shouldExport = true;
+				} 
+				else if (filterType === 'ko_basic') {
+					if (isKorean || isBasicTool) shouldExport = true;
+				}
+
+				if (shouldExport) {
+					// 確保 value 被轉換為字串後再串接
+					exportContent += `${key}\t${String(value)}\n`;
+				}
+				cursor.continue();
 			} else {
-				alert(fdrawer.noDataToExport);
+				// 遍歷結束，執行下載
+				if (exportContent === "") {
+					alert(fdrawer.noDataToExport || "沒有符合條件的資料可供匯出。");
+					return;
+				}
+
+				const blob = new Blob([exportContent], { type: 'text/plain' });
+				const url = URL.createObjectURL(blob);
+				const a = document.createElement('a');
+				const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+				
+				// 檔名加入篩選資訊
+				a.href = url;
+				a.download = `font-data-${filterType}-${timestamp}.txt`;
+				a.click();
+				URL.revokeObjectURL(url);
 			}
+		};
+
+		request.onerror = function () {
+			console.error("匯出資料時發生錯誤");
 		};
 	});
 

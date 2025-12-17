@@ -25,12 +25,20 @@ const translations = {
     "h3_export_events": "匯出系統事件（開發用）",
     "h3_import_data": "匯入先前備份的資料",
     "h3_export_data": "匯出編輯中資料",
+    
+    // 篩選匯出功能
+    "label_export_filter": "匯出範圍：",
+    "option_export_all": "所有字 (All)",
+    "option_export_zh_basic": "中文字",
+    "option_export_ko_basic": "韓文字",
 
     // 按鈕文字
     "button_clear_all_text": "清除字型資料（無法復原！）",
     "button_export_events_text": "匯出系統事件",
     "button_download_font_otf": "下載字型OTF檔案",
     "button_export_data_backup": "備份工作中的字型資料",
+    "button_import_data": "匯入先前備份的資料",
+    "button_export_data": "匯出編輯中資料",
     
     // 選項翻譯 (Select Option Texts)
     "grid_3x3": "九宮格",
