@@ -1296,69 +1296,34 @@ $(document).ready(async function () {
 	});
 
     // 匯入資料
-    // fontdrawer.js
-	$('#importDataFile').on('change', function (e) {
-		const file = e.target.files[0];
-		if (file) {
-			// 修改提示文字，告知使用者這是增量匯入
-			if (confirm(translations.fdrawer_import_confirm_incremental)) {
-				const reader = new FileReader();
-				reader.onload = async function (event) {
-					const text = event.target.result;
-					const lines = text.split('\n');
-					let addedCount = 0;
-					let skippedCount = 0;
+    $('#importDataFile').on('change', async function () {
+        if (confirm(fdrawer.importConfirm)) {
+            const fileInput = $(this);
+            const file = fileInput[0].files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = async function (e) {
+                    await clearDB(); // 清除現有的 IndexedDB 資料
+                    const data = e.target.result;
+                    const lines = data.split('\n');
+                    for (const line of lines) {
+                        if (line.trim() === '') continue; // 跳過空行
+                        const parts = line.split('\t');
+                        if (parts.length < 2) continue; // 如果格式不正確，跳過
+                        const key = parts[0].trim();
+                        const value = parts[1].trim();
+                        await saveToDB(key, value);
+                    }
+                    alert(fdrawer.importDone);
+                    location.reload(); // 重新載入頁面
+                };
+                reader.readAsText(file);
+            }
+        } else {
+            $(this).val(''); // 清除選擇的檔案
+        }
+    });
 
-					// 取得資料庫交易
-					const transaction = db.transaction([storeName], 'readwrite');
-					const store = transaction.objectStore(storeName);
-
-					// 定義一個檢查並儲存的 Promise
-					const processLine = (key, value) => {
-						return new Promise((resolve) => {
-							const checkRequest = store.get(key);
-							checkRequest.onsuccess = function() {
-								if (checkRequest.result === undefined) {
-									// 資料庫中找不到此 key，執行新增
-									const addRequest = store.put(value, key);
-									addRequest.onsuccess = () => {
-										addedCount++;
-										resolve();
-									};
-								} else {
-									// 資料庫已存在此 key，跳過
-									skippedCount++;
-									resolve();
-								}
-							};
-							checkRequest.onerror = () => resolve(); // 錯誤時也繼續
-						});
-					};
-
-					// 遍歷每一行進行處理
-					for (const line of lines) {
-						if (line.trim() === '') continue;
-						const parts = line.split('\t');
-						if (parts.length < 2) continue;
-						
-						const key = parts[0].trim();
-						const value = parts[1].trim();
-						
-						// 等待每一行處理完畢
-						await processLine(key, value);
-					}
-
-					// 處理完成後的報告
-					const doneMsg = `Done!\n🆕 ${addedCount} \n⏩${skippedCount} `;
-					alert(doneMsg);
-					location.reload(); 
-				};
-				reader.readAsText(file);
-			}
-		}
-		// 清除選擇的檔案，以便下次可以選擇同一個檔案
-		$(this).val('');
-	});
 
     // 修改清除所有資料的功能
     $('#clearAllButton').on('click', async function () {
